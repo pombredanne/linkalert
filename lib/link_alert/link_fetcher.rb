@@ -33,8 +33,15 @@ module LinkAlert
     # 
     # Returns an Array of Hashes with the keys :domain, :path, and :visits.
     def download_links_since_last_update(profile_id)
-      # yesterday
-      @account.get_links(profile_id, @account.last_checked, Date.today)
+      # Only check up until yesterday because today's data is still incomplete.
+      yesterday = Date.today - 1
+
+      # Only run if there is data to collect.
+      if @account.last_checked <= yesterday
+        @account.get_links(profile_id, @account.last_checked, Date.today -1)
+      else
+        []
+      end
     end
 
     # Remove unwanted traffic sources.
