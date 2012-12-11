@@ -1,0 +1,6 @@
+username: 'myuser'
+password: 'mypassword'
+mongo_url: <%= ENV['MONGO_URL'] %>
+api:
+  client_id: <%= ENV['GOOGLE_CLIENT_ID'] %>
+  client_secret: <%= ENV['GOOGLE_CLIENT_SECRET'] %>
