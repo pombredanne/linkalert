@@ -18,17 +18,33 @@ account = LinkAlert::AnalyticsAccount.new(
   config['api']['client_secret']
 )
 
-
-profiles = ['56543886', '61926118']
 fetcher = LinkAlert::LinkFetcher.new(account)
+result = {}
 
 
-profiles.each do |profile_id|
-  links = fetcher.links_for_profile(profile_id)
-  # TODO: update links db
-  # TODO: keep new links
+account.profiles.each do |profile_id, profile_name|
+  # Get all links for this period.
+  all_links = fetcher.links_for_profile(profile_id)
+
+  # Determine which of them are new.
+  checker = LinkAlert::LinkChecker.new(db, profile_id)
+  new_links = checker.determine_new_links(all_links)
+  result[profile_id] = new_links
+
+  # Add the new links to the DB for next time.
+  checker.add_new_urls(new_links)
 end
 
 
-# TODO: send email with new links
-# TODO: update last_checked
+# TODO: prevent sending email if no new links
+# Send the email alert to each address.
+mailer = LinkAlert::Mailer.new(
+  config['postmark_api_key'],
+  config['postmark_from_email'],
+  account.profiles
+)
+mailer.build_message(result)
+
+account.emails.each { |email| mailer.deliver_to(email) }
+
+# TODO: update last checked at

@@ -1,0 +1,6 @@
+<% link_data.each do |profile_id, links| %>
+  <p>New links for <%= @profiles[profile_id] %></p>
+  <ul>
+    <% links.each do |url| %><li><a href="<%= url %>"><%= url %></li><% end %>
+  </ul>
+<% end %>

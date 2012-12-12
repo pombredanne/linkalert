@@ -1,6 +1,8 @@
 username: 'myuser'
 password: 'mypassword'
 mongo_url: <%= ENV['MONGO_URL'] %>
+postmark_api_key: <%= ENV['POSTMARK_API_KEY'] %>
+postmark_from_email: <%= ENV['POSTMARK_FROM_EMAIL'] %>
 api:
   client_id: <%= ENV['GOOGLE_CLIENT_ID'] %>
   client_secret: <%= ENV['GOOGLE_CLIENT_SECRET'] %>

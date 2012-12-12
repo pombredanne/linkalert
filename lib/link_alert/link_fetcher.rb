@@ -38,7 +38,7 @@ module LinkAlert
 
       # Only run if there is data to collect.
       if @account.last_checked <= yesterday
-        @account.get_links(profile_id, @account.last_checked, Date.today -1)
+        @account.get_links(profile_id, @account.last_checked, yesterday)
       else
         []
       end

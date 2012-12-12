@@ -32,56 +32,6 @@ module LinkAlert
       @analytics = @client.discovered_api('analytics', 'v3')
     end
 
-    # Get a list of Analytics profiles.
-    # 
-    # Does a live API request and returns a list of all profiles that the
-    # current user has access to.
-    # 
-    # Returns an Array of Hashes with the keys :id, :name, and :url.
-    def profiles_list
-      params = {
-        api_method: analytics.management.profiles.list,
-        parameters: {accountId: '~all', webPropertyId: '~all'}
-      }
-
-      api_call(params) do |response|
-        return response['items'].map do |item|
-          {id: item['id'], name: item['name'], url: item['websiteUrl']}
-        end
-      end
-    end
-
-    # Get all referring URLs for the given profile and time period.
-    # 
-    # profile_id - String Analytics profile ID.
-    # start_date - Date start date.
-    # end_date - Date end date.
-    # 
-    # Does a live API request and returns up to 1,000 referring URLs for the
-    # given profile in the given time period. Results are ordered by the
-    # number of vists received from each URL.
-    # 
-    # Returns an Array of Hashes with the keys :domain, :path, and :visits.
-    def get_links(profile_id, start_date, end_date)
-      params = {
-        api_method: analytics.data.ga.get,
-        parameters: {
-          'ids' => "ga:#{profile_id}",
-          'start-date' => start_date.to_s,
-          'end-date' => end_date.to_s,
-          'metrics' => 'ga:visits',
-          'dimensions' => 'ga:source,ga:referralPath',
-          'sort' => '-ga:visits'
-        }
-      }
-
-      api_call(params) do |response|
-        return response['rows'].map do |row|
-          {domain: row[0], path: row[1], visits: row[2]}
-        end
-      end
-    end
-
     # Get the account document.
     # 
     # The analytics oauth token, as well as preferences (which profiles are
@@ -136,7 +86,7 @@ module LinkAlert
         access_token: access_token,
         refresh_token: refresh_token,
         emails: [],
-        profiles: [],
+        profiles: {},
         last_checked: nil
       })
     end
@@ -196,16 +146,35 @@ module LinkAlert
       end
     end
 
-    # Get the analytics profile IDs that are alerted on.
+    # Get a list of Analytics profiles.
     # 
-    # Returns an Array of profile IDs (as strings).
+    # Does a live API request and returns a list of all profiles that the
+    # current user has access to.
+    # 
+    # Returns an Array of Hashes with the keys :id, :name, and :url.
+    def available_profiles
+      params = {
+        api_method: analytics.management.profiles.list,
+        parameters: {accountId: '~all', webPropertyId: '~all'}
+      }
+
+      api_call(params) do |response|
+        return response['items'].map do |item|
+          {id: item['id'], name: item['name'], url: item['websiteUrl']}
+        end
+      end
+    end
+
+    # Get the analytics profiles that are alerted on.
+    # 
+    # Returns a Hash of { profile_id: profile_name }
     def profiles
       account['profiles'] if setup?
     end
 
     # Set the analytics profile IDs to alert on.
     # 
-    # selected_profiles - Array of profile IDs (as strings).
+    # selected_profiles - Hash of { profile_id: profile_name }
     # 
     # Returns the result of the DB operation.
     def profiles=(selected_profiles)
@@ -215,6 +184,37 @@ module LinkAlert
           {'_id' => account['_id']},
           {'$set' => {profiles: selected_profiles}}
         )
+      end
+    end
+
+    # Get all referring URLs for the given profile and time period.
+    # 
+    # profile_id - String Analytics profile ID.
+    # start_date - Date start date.
+    # end_date - Date end date.
+    # 
+    # Does a live API request and returns up to 1,000 referring URLs for the
+    # given profile in the given time period. Results are ordered by the
+    # number of vists received from each URL.
+    # 
+    # Returns an Array of Hashes with the keys :domain, :path, and :visits.
+    def get_links(profile_id, start_date, end_date)
+      params = {
+        api_method: analytics.data.ga.get,
+        parameters: {
+          'ids' => "ga:#{profile_id}",
+          'start-date' => start_date.to_s,
+          'end-date' => end_date.to_s,
+          'metrics' => 'ga:visits',
+          'dimensions' => 'ga:source,ga:referralPath',
+          'sort' => '-ga:visits'
+        }
+      }
+
+      api_call(params) do |response|
+        return response['rows'].map do |row|
+          {domain: row[0], path: row[1], visits: row[2]}
+        end
       end
     end
 

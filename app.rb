@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'date'
+require 'json'
 require 'mongo'
 require 'sinatra'
 require './lib/link_alert'
@@ -36,6 +37,11 @@ get '/' do
 end
 
 
+get '/profiles' do
+  JSON.dump(account.available_profiles)
+end
+
+
 post '/update_settings' do
   # profiles
   # email addresses
@@ -44,10 +50,8 @@ end
 
 get '/oauth_callback' do
   if params[:code]
-    tokens = analytics.tokens_from_code(params[:code])
-
-    client = LinkAlert::Client.new()
-    client.add_account(tokens['access_token'], tokens['refresh_token'])
+    tokens = account.tokens_from_authorization_code(params[:code])
+    account.add_account(tokens['access_token'], tokens['refresh_token'])
 
     # Need a way to start the background job to grab all the initial data
 
