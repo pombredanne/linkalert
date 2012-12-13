@@ -29,10 +29,12 @@ get '/' do
   if account.setup?
     # get current emails, profiles
     # get list of all possible profiles
-    "Show user preferences"
+    @account = account
+    erb :index
   else
     redirect_url = to('/oauth_callback')
-    "Start oauth flow: #{account.authorization_url(redirect_url)}"
+    @oauth_link = account.authorization_url(redirect_url)
+    erb :setup_oauth
   end
 end
 

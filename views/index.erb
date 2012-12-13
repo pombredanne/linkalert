@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Link Alert</title>
+  <meta name="description" content="">
+
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Open+Sans:400,700'>
+  <link rel="stylesheet" href="/stylesheet.css">
+</head>
+
+<body>
+
+
+  <div id="content">
+
+    <h2>Which sites do you want alerts for?</h2>
+
+    <ul id="profiles">
+    <% @account.available_profiles.each do |profile| %>
+      <li>
+        <input type="checkbox" id="profile_<%= profile[:id] %>">
+        <label for="profile_<%= profile[:id] %>">
+          <%= profile[:name] %> <span class="domain">(<%= profile[:url] %>)</span>
+        </label>
+      </li>
+    <% end %>
+    </ul>
+
+
+    <h2>Where should we send them?</h2>
+
+    <p class="help">Enter email addresses below, one per line.</p>
+
+    <textarea rows="6" cols="35" spellcheck="false"></textarea>
+
+    <p><a href="" class="button green">Update Settings</a></p>
+
+  </div>
+
+
+</body>
+</html>
