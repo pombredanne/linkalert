@@ -27,8 +27,6 @@ account = LinkAlert::AnalyticsAccount.new(
 
 get '/' do
   if account.setup?
-    # get current emails, profiles
-    # get list of all possible profiles
     @account = account
     erb :index
   else
@@ -36,11 +34,6 @@ get '/' do
     @oauth_link = account.authorization_url(redirect_url)
     erb :setup_oauth
   end
-end
-
-
-get '/profiles' do
-  JSON.dump(account.available_profiles)
 end
 
 
@@ -54,10 +47,7 @@ get '/oauth_callback' do
   if params[:code]
     tokens = account.tokens_from_authorization_code(params[:code])
     account.add_account(tokens['access_token'], tokens['refresh_token'])
-
-    # Need a way to start the background job to grab all the initial data
-
-    "It worked"
+    redirect to('/')
   else
     "You must grant access in order to use this app."
   end
