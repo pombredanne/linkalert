@@ -172,6 +172,15 @@ module LinkAlert
       account['profiles'] if setup?
     end
 
+    # Is this profile active?
+    # 
+    # profile_id - String Analytics profile ID.
+    # 
+    # Returns a Boolean true if we are alerting on that site, or false if not.
+    def profile_active?(profile_id)
+      profiles.has_key? profile_id
+    end
+
     # Set the analytics profile IDs to alert on.
     # 
     # selected_profiles - Hash of { profile_id: profile_name }
