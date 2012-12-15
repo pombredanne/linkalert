@@ -36,15 +36,24 @@ account.profiles.each do |profile_id, profile_name|
 end
 
 
-# TODO: prevent sending email if no new links
-# Send the email alert to each address.
-mailer = LinkAlert::Mailer.new(
-  config['postmark_api_key'],
-  config['postmark_from_email'],
-  account.profiles
-)
-mailer.build_message(result)
+num_links = 0
+result.each do |profile_id, links|
+  num_links += links.count
+end
 
-account.emails.each { |email| mailer.deliver_to(email) }
+if num_links > 0
+  # Send the email alert to each address.
+  mailer = LinkAlert::Mailer.new(
+    config['postmark_api_key'],
+    config['postmark_from_email'],
+    account.profiles
+  )
+  mailer.build_message(result)
 
-# TODO: update last checked at
+  account.emails.each { |email| mailer.deliver_to(email) }
+
+  # Update last checked at to yesterday, which is the last day of links
+  # we checked.
+  yesterday = Date.today - 1
+  account.last_checked = yesterday
+end
